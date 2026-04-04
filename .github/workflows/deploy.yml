@@ -38,9 +38,11 @@ jobs:
         run: docker save crud-app-${{ env.ENV_NAME }} | gzip > app.tar.gz
 
       - name: Setup SSH key
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy.pem
+          echo "$SSH_KEY" > ~/.ssh/deploy.pem
           chmod 600 ~/.ssh/deploy.pem
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
