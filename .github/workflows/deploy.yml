@@ -53,13 +53,19 @@ jobs:
       - name: Deploy on EC2
         run: |
           ssh -i ~/.ssh/deploy.pem -p 22 ubuntu@${{ secrets.EC2_HOST }} "
-            docker stop crud-app-${{ env.ENV_NAME }} || true
-            docker rm crud-app-${{ env.ENV_NAME }} || true
-            docker load < /home/ubuntu/app.tar.gz
+            echo '=== loading image ===' && \
+            ls -la /home/ubuntu/ && \
+            docker load < /home/ubuntu/app.tar.gz && \
+            echo '=== stopping old container ===' && \
+            docker stop crud-app-${{ env.ENV_NAME }} || true && \
+            docker rm crud-app-${{ env.ENV_NAME }} || true && \
+            echo '=== starting new container ===' && \
             docker run -d \
               --name crud-app-${{ env.ENV_NAME }} \
               -p ${{ env.APP_PORT }}:3000 \
-              crud-app-${{ env.ENV_NAME }}
+              crud-app-${{ env.ENV_NAME }} && \
+            echo '=== done ===' && \
+            docker ps && \
             rm /home/ubuntu/app.tar.gz
           "
 
