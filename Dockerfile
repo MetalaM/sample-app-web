@@ -1,7 +1,8 @@
 FROM node:14-alpine
 
-# install sauce connect
-RUN curl -LO https://saucelabs.com/downloads/sc-4.8.2-linux.tar.gz && \
+# install curl and sauce connect
+RUN apk add --no-cache curl && \
+    curl -LO https://saucelabs.com/downloads/sc-4.8.2-linux.tar.gz && \
     tar xvf ./sc-4.8.2-linux.tar.gz && \
     rm sc-4.8.2-linux.tar.gz
 ENV PATH="/root/sc-4.8.2-linux/bin:$PATH"
