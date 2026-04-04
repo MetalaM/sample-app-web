@@ -43,6 +43,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           source: app.tar.gz
           target: /home/ubuntu/
 
@@ -52,6 +53,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
             docker stop crud-app-${{ env.ENV_NAME }} || true
             docker rm crud-app-${{ env.ENV_NAME }} || true
