@@ -9,3 +9,6 @@ ENV PATH="$HOME/sc-4.8.2-linux/bin:$PATH"
 WORKDIR /sample-app-web
 COPY . .
 RUN npm ci
+
+EXPOSE 3000
+CMD ["npm", "start"]
