@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-  release:
-    types: [published]
 
 jobs:
   deploy:
@@ -17,25 +15,14 @@ jobs:
 
       - name: Set environment
         run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
-            if [[ "$TAG" == *"-rc"* ]]; then
-              echo "ENV_NAME=test" >> $GITHUB_ENV
-              echo "APP_PORT=3002" >> $GITHUB_ENV
-            else
-              echo "ENV_NAME=prod" >> $GITHUB_ENV
-              echo "APP_PORT=3003" >> $GITHUB_ENV
-            fi
-          else
-            echo "ENV_NAME=dev" >> $GITHUB_ENV
-            echo "APP_PORT=3001" >> $GITHUB_ENV
-          fi
+          echo "ENV_NAME=dev" >> $GITHUB_ENV
+          echo "APP_PORT=3001" >> $GITHUB_ENV
 
       - name: Build Docker image
-        run: docker build -t crud-app-${{ env.ENV_NAME }} .
+        run: docker build -t crud-app-dev .
 
       - name: Save Docker image
-        run: docker save crud-app-${{ env.ENV_NAME }} | gzip > app.tar.gz
+        run: docker save crud-app-dev | gzip > app.tar.gz
 
       - name: Setup SSH key
         env:
@@ -53,21 +40,17 @@ jobs:
       - name: Deploy on EC2
         run: |
           ssh -i ~/.ssh/deploy.pem -p 22 ubuntu@${{ secrets.EC2_HOST }} "
-            echo '=== loading image ===' && \
-            ls -la /home/ubuntu/ && \
             docker load < /home/ubuntu/app.tar.gz && \
-            echo '=== stopping old container ===' && \
-            docker stop crud-app-${{ env.ENV_NAME }} || true && \
-            docker rm crud-app-${{ env.ENV_NAME }} || true && \
-            echo '=== starting new container ===' && \
+            docker stop crud-app-dev || true && \
+            docker rm crud-app-dev || true && \
             docker run -d \
-              --name crud-app-${{ env.ENV_NAME }} \
-              -p ${{ env.APP_PORT }}:3000 \
-              crud-app-${{ env.ENV_NAME }} && \
-            echo '=== done ===' && \
-            docker ps && \
+              --name crud-app-dev \
+              --restart always \
+              -p 3001:3000 \
+              crud-app-dev && \
+            docker image prune -f && \
             rm /home/ubuntu/app.tar.gz
           "
 
       - name: Print deployed URL
-        run: echo "Deployed to http://${{ secrets.EC2_HOST }}:${{ env.APP_PORT }}"
+        run: echo "Deployed to http://${{ secrets.EC2_HOST }}:3001"
