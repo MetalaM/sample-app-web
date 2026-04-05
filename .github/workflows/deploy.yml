@@ -71,4 +71,3 @@ jobs:
 
       - name: Print deployed URL
         run: echo "Deployed to http://${{ secrets.EC2_HOST }}:${{ env.APP_PORT }}"
-        
