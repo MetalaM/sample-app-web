@@ -57,6 +57,7 @@ jobs:
             docker run -d \
               --name crud-app-${{ env.ENV_NAME }} \
               --restart always \
+              -e HOST=0.0.0.0 \
               -p 3000:3000 \
               crud-app-${{ env.ENV_NAME }} && \
             docker image prune -f && \
