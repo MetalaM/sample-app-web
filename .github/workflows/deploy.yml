@@ -22,13 +22,16 @@ jobs:
             if [[ "$TAG" == *"-rc"* ]]; then
               echo "ENV_NAME=test" >> $GITHUB_ENV
               echo "EC2_HOST=${{ secrets.EC2_HOST_TEST }}" >> $GITHUB_ENV
+              echo "PORT=3002" >> $GITHUB_ENV
             else
               echo "ENV_NAME=prod" >> $GITHUB_ENV
               echo "EC2_HOST=${{ secrets.EC2_HOST_PROD }}" >> $GITHUB_ENV
+              echo "PORT=3003" >> $GITHUB_ENV
             fi
           else
             echo "ENV_NAME=dev" >> $GITHUB_ENV
             echo "EC2_HOST=${{ secrets.EC2_HOST_DEV }}" >> $GITHUB_ENV
+            echo "PORT=3001" >> $GITHUB_ENV
           fi
 
       - name: Build Docker image
