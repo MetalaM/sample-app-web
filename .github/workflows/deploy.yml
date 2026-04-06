@@ -6,6 +6,20 @@ on:
       - main
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - dev
+          - test
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
 
 jobs:
   deploy:
@@ -14,10 +28,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Set environment
         run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.environment }}" == "test" ]; then
+              echo "ENV_NAME=test" >> $GITHUB_ENV
+              echo "EC2_HOST=${{ secrets.EC2_HOST_TEST }}" >> $GITHUB_ENV
+              echo "PORT=3002" >> $GITHUB_ENV
+            else
+              echo "ENV_NAME=dev" >> $GITHUB_ENV
+              echo "EC2_HOST=${{ secrets.EC2_HOST_DEV }}" >> $GITHUB_ENV
+              echo "PORT=3001" >> $GITHUB_ENV
+            fi
+          elif [ "${{ github.event_name }}" == "release" ]; then
             TAG="${{ github.event.release.tag_name }}"
             if [[ "$TAG" == *"-rc"* ]]; then
               echo "ENV_NAME=test" >> $GITHUB_ENV
@@ -86,4 +112,4 @@ jobs:
           "
 
       - name: Print deployed URL
-        run: echo "Deployed to http://${{ env.EC2_HOST }}:3000"
+        run: echo "Deployed to http://${{ env.EC2_HOST }}:${{ env.PORT }}"
