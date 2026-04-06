@@ -107,7 +107,7 @@ function Login(props) {
                   value={password}
                   onChange={handlePassChange}
                   testId="password"
-                  placeholder="Password"
+                  placeholder="Passwords"
                   // Custom
                   autoCorrect="off"
                   autoCapitalize="none"
