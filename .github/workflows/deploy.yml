@@ -16,10 +16,6 @@ on:
         options:
           - dev
           - test
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'main'
 
 jobs:
   deploy:
