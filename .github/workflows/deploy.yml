@@ -34,6 +34,24 @@ jobs:
             echo "PORT=3001" >> $GITHUB_ENV
           fi
 
+      - name: Ensure curl and Docker are installed on EC2
+        run: |
+          ssh -i ~/.ssh/deploy.pem ubuntu@${{ env.EC2_HOST }} "
+            which curl || sudo apt install -y curl &&
+            which docker || (
+              sudo apt update -y &&
+              sudo apt install -y ca-certificates curl gnupg &&
+              sudo install -m 0755 -d /etc/apt/keyrings &&
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&
+              echo \"deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null &&
+              sudo apt update -y &&
+              sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &&
+              sudo systemctl start docker &&
+              sudo systemctl enable docker &&
+              sudo usermod -aG docker ubuntu
+            )
+          "
+          
       - name: Build Docker image
         run: docker build -t crud-app-${{ env.ENV_NAME }} .
 
